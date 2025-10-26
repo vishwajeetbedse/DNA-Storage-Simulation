@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced DNA Data Storage Simulator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-light: #4ea8e1;
+            --primary-dark: #2980b9;
+            --secondary-color: #2c3e50;
+            --bg-color: #f4f7f6;
+            --white: #ffffff;
+            --text-color: #333;
+            --light-gray: #e0e0e0;
+            --success-bg: #d4edda;
+            --success-border: #c3e6cb;
+            --success-text: #155724;
+            --info-bg: #eaf5ff;
+            --info-border: #b8daff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid var(--light-gray);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--secondary-color), #34495e);
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            fill: var(--white);
+            opacity: 0.9;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin: 0;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .step {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e8e8e8;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            /* Scroll animation */
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .step.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .step h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4em;
+        }
+        
+        .step-number {
+            background: var(--primary-color);
+            color: var(--white);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+        
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        
+        .button {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            margin: 5px;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+        }
+        
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            background: var(--primary-light);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
+        }
+
+        .button.secondary {
+            background: #7f8c8d;
+            box-shadow: 0 4px 15px rgba(127, 140, 141, 0.2);
+        }
+        .button.secondary:hover {
+            background: #95a5a6;
+            box-shadow: 0 6px 20px rgba(127, 140, 141, 0.4);
+        }
+        
+        .visualization {
+            background: var(--white);
+            border: 1px solid var(--light-gray);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 100px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        .visualization.visible {
+            opacity: 1;
+        }
+        
+        /* --- DNA VISUALIZATION --- */
+        .dna-view-tabs {
+            margin-bottom: 10px;
+        }
+        .dna-view-tabs .tab-button {
+            padding: 8px 15px;
+            border: 1px solid var(--light-gray);
+            background: #f0f0f0;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            border-bottom: none;
+            margin-right: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+        .dna-view-tabs .tab-button.active {
+            background: var(--white);
+            border-bottom: 1px solid var(--white);
+            color: var(--primary-color);
+            position: relative;
+            top: 1px;
+        }
+
+        .dna-sequence-container {
+            background: #fdfdfd;
+            border: 1px solid var(--light-gray);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            margin-top: -1px; /* Connects to tabs */
+        }
+
+        /* View 1: DNA Ladder */
+        #dnaLadderView {
+            display: inline-flex; 
+            flex-direction: column;
+            padding: 10px 0;
+            min-height: 120px; 
+        }
+        
+        .dna-strand {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .dna-backbone {
+            height: 5px;
+            background: var(--secondary-color);
+            border-radius: 3px;
+        }
+        
+        .base-link-container {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .base-link {
+            width: 30px; /* Match base width */
+            height: 15px; /* Space between strands */
+            position: relative;
+        }
+
+        /* --- FIXED BOND CSS --- */
+        /* Base styles for all bond-lines (pseudo-elements) */
+        .base-link::before,
+        .base-link::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #dcdcdc;
+            border-radius: 1px;
+            top: 0;
+        }
+        
+        /* A-T (Double Bond) */
+        .base-link.double::before {
+            left: calc(50% - 4px); /* 2px gap in middle */
+        }
+        .base-link.double::after {
+            left: calc(50% + 2px);
+        }
+
+        /* C-G (Triple Bond) */
+        /* Use a child span for the middle bond */
+        .base-link .middle-bond {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #dcdcdc;
+            border-radius: 1px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%); /* Center it */
+        }
+        .base-link.triple::before {
+            left: calc(50% - 6px); /* 2px gap */
+        }
+        .base-link.triple::after {
+            left: calc(50% + 4px); /* 2px gap */
+        }
+        /* --- END FIXED BOND CSS --- */
+
+
+        .dna-base {
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-family: 'Menlo', 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .dna-base-A { background: #e74c3c; }
+        .dna-base-T { background: #3498db; }
+        .dna-base-C { background: #2ecc71; }
+        .dna-base-G { background: #f39c12; }
+        
+        /* View 2: Character View */
+        #dnaCharView {
+            font-family: 'Menlo', 'Courier New', monospace;
+            word-break: break-all;
+            line-height: 1.8;
+            white-space: normal; /* Allow wrapping in this view */
+        }
+        .char-base-A { color: #e74c3c; font-weight: 600; }
+        .char-base-T { color: #3498db; font-weight: 600; }
+        .char-base-C { color: #2ecc71; font-weight: 600; }
+        .char-base-G { color: #f39c12; font-weight: 600; }
+        /* --- END DNA VISUALIZATION --- */
+        
+        .binary-sequence {
+            background: #f4f4f4;
+            color: var(--secondary-color);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        
+        .explanation {
+            background: var(--info-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-item h4 {
+            font-size: 1.1em;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+        .stat-item p {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .process-steps {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .process-step {
+            padding: 20px;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+            border: 1px solid #e8e8e8;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .process-step-info {
+            text-align: left;
+        }
+        .process-step-info h4 {
+            color: var(--secondary-color);
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        .process-step-output {
+            min-width: 0; /* CRITICAL FIX for grid blowout */
+            text-align: left;
+        }
+        .process-step-output .binary-sequence,
+        .process-step-output .explanation,
+        .process-step-output .dna-sequence-container {
+            margin: 0; /* Remove top margin */
+        }
+        
+        .process-icon {
+            color: var(--primary-color);
+            margin-bottom: 0;
+        }
+        .process-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+        
+        .success-message {
+            background: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-text);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+            font-size: 0.9em;
+            margin-top: 20px;
+            /* Scroll animation */
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .footer.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal {
+            transform: scale(1);
+        }
+        .modal h2 {
+            margin-top: 0;
+            color: var(--secondary-color);
+        }
+        .modal-content {
+            margin-bottom: 20px;
+        }
+        .modal-content p {
+            margin-bottom: 10px;
+        }
+        .modal-content ul, .modal-content ol {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        .modal-actions {
+            text-align: right;
+        }
+
+        /* Help Button */
+        .help-button {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #777;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: auto;
+            transition: background 0.3s, color 0.3s;
+        }
+        .help-button:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+            .process-step {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .button {
+                padding: 12px 20px;
+                width: 100%;
+            }
+            .header-content {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.96 1.63c-.1-.02-.2-.02-.3 0C7.8 2.5 4.33 7.15 3.23 12c.07.2.1.42.1.65 0 .23-.03.45-.1.65 1.1 4.85 4.58 9.5 9.43 10.37.1.02.2.02.3 0 4.85-.87 8.32-5.52 9.42-10.37-.07-.2-.1-.42-.1-.65 0-.23.03.45.1-.65-1.1-4.85-4.57-9.5-9.42-10.37zM11 5.3c.53 0 1.04.1 1.48.28.44.18.78.4.98.63l.25.26c.2.23.3.48.28.7L13.9 10H10l-.08-2.83c-.02-.22.08-.47.28-.7l.25-.26c.2-.23.54-.45.98-.63.44-.18.95-.28 1.48-.28zm.92 6.7h.03c.55 0 1.07.1 1.5.28.44.18.78.4.98.63l.25.26c.2.23.3.48.28.7L14.9 16.7c-.1.84-.78 1.5-1.63 1.5H10.6c-.84 0-1.53-.66-1.63-1.5L8.9 13.87c-.02-.22.08-.47.28-.7l.25-.26c.2-.23.54-.45.98-.63.43-.18.95-.28 1.5-.28z"/>
+                </svg>
+                <h1>DNA Data Storage Simulator</h1>
+            </div>
+            <p>An interactive model of digital-to-biological data encoding.</p>
+        </div>
+        
+        <div class="content">
+            <!-- Step 1: Text Input -->
+            <div class="step is-visible">
+                <h3>
+                    <span class="step-number">1</span> Enter Your Text
+                    <button class="help-button" onclick="showHelp(1)" aria-label="Show help for Step 1">?</button>
+                </h3>
+                
+                <div id="tab-text" class="tab-content" style="display: block;">
+                    <div class="input-group">
+                        <label for="inputText">Type any text you want to store in DNA:</label>
+                        <textarea id="inputText" placeholder="Enter your secret message here...">Hello DNA!</textarea>
+                    </div>
+                </div>
+                
+                <button class="button" onclick="encodeData()">Encode to DNA</button>
+            </div>
+            
+            <!-- Step 2: Encoding Process -->
+            <div class="step" data-animate>
+                <h3>
+                    <span class="step-number">2</span> Encoding Process
+                    <button class="help-button" onclick="showHelp(2)" aria-label="Show help for Step 2">?</button>
+                </h3>
+                <div class="process-steps">
+                    <!-- Data to Binary -->
+                    <div class="process-step">
+                        <div class="process-step-info">
+                            <div class="process-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
+                            </div>
+                            <h4>Data to Binary</h4>
+                            <p>Each character becomes 8 bits</p>
+                        </div>
+                        <div class="process-step-output">
+                            <div class="binary-sequence" id="binaryOutputContainer">
+                                <div id="binaryOutput"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Binary to DNA -->
+                    <div class="process-step">
+                        <div class="process-step-info">
+                            <div class="process-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.01 11H4v2h12.01v3L20 12l-3.99-4v3z"/></svg>
+                            </div>
+                            <h4>Binary to DNA</h4>
+                            <p>Bits are mapped to DNA bases</p>
+                        </div>
+                        <div class="process-step-output">
+                            <div class="explanation" style="margin: 0; text-align: left;">
+                                <strong>Mapping Rules:</strong><br>
+                                00 = <span class="char-base-A">A</span> (Adenine)<br>
+                                01 = <span class="char-base-T">T</span> (Thymine)<br>
+                                10 = <span class="char-base-C">C</span> (Cytosine)<br>
+                                11 = <span class="char-base-G">G</span> (Guanine)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- DNA Sequence -->
+                    <div class="process-step">
+                        <div class="process-step-info">
+                            <div class="process-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14.24 4.56a5.5 5.5 0 0 0-3.5 3.23L9.66 10H8v2h2.34l-1.09 2.72a3.5 3.5 0 0 1-2.14 2.14L4.5 18H3.22c-1.1 0-2 .9-2 2h1.22a5.5 5.5 0 0 0 3.5-3.23L7.02 17h2.96l1.09-2.72a3.5 3.5 0 0 1 2.14-2.14L15.82 11h1.22c1.1 0 2-.9 2-2h-1.22a5.5 5.5 0 0 0-3.5 3.23L13.22 14h-2.96L11.35 11h3.37c.3 0 .58-.16.71-.4.14-.24.1-.54-.08-.74l-1-1.74c-.3-.5-.73-.9-1.2-1.2l-1.74-1C11.16 5.8 10.86 5.76 10.62 5.9c-.24.13-.4.4-.4.7v.03L9.04 8.76a3.5 3.5 0 0 1 2.14 2.14L12.26 13h1.46l2.61-4.56a5.5 5.5 0 0 0-2.1-3.88z"/></svg>
+                            </div>
+                            <h4>DNA Sequence</h4>
+                            <p>Your data as a DNA strand</p>
+                        </div>
+                        <div class="process-step-output">
+                            <!-- Tab buttons -->
+                            <div class="dna-view-tabs">
+                                <button class="tab-button active" id="btn-view-ladder" onclick="switchDnaView('ladder')">DNA Ladder</button>
+                                <button class="tab-button" id="btn-view-char" onclick="switchDnaView('char')">Character View</button>
+                            </div>
+                            <!-- Tab content container -->
+                            <div class="dna-sequence-container" id="dnaOutputContainer">
+                                <div id="dnaLadderView" style="display: inline-flex; flex-direction: column;">
+                                    <!-- Horizontal DNA ladder will be injected here -->
+                                </div>
+                                <div id="dnaCharView" style="display: none;">
+                                    <!-- Character sequence will be injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: NEW STATS STEP -->
+            <div class="step" data-animate id="statsStep" style="display: none;">
+                <h3>
+                    <span class="step-number">3</span> Real-World Statistics
+                    <button class="help-button" onclick="showHelp(3)" aria-label="Show help for Step 3">?</button>
+                </h3>
+                <div class="explanation">
+                    These are illustrative stats based on the length of your data, showing the power of DNA storage.
+                </div>
+                <div class="stats-grid" id="statsOutput">
+                    <!-- Stats will be injected here by JS -->
+                </div>
+            </div>
+            
+            <!-- Step 4: Decode -->
+            <div class="step" data-animate>
+                <h3>
+                    <span class="step-number">4</span> Manual Decoder
+                    <button class="help-button" onclick="showHelp(4)" aria-label="Show help for Step 4">?</button>
+                </h3>
+                <div class="explanation">
+                    Paste a DNA sequence (using only A, T, C, G) to see what it decodes to. Try changing a letter from your sequence above!
+                </div>
+                <div class="input-group">
+                    <label for="dnaInput">Enter DNA sequence to decode:</label>
+                    <textarea id="dnaInput" placeholder="Paste DNA sequence here..."></textarea>
+                </div>
+                <button class="button" onclick="decodeFromDNA()">Decode from DNA</button>
+                <div id="decodedOutput" class="visualization" style="margin-top: 20px; min-height: 0;"></div>
+            </div>
+            
+            <!-- Step 5: Examples -->
+            <div class="step" data-animate>
+                <h3>
+                    <span class="step-number">5</span> Try Different Messages
+                    <button class="help-button" onclick="showHelp(5)" aria-label="Show help for Step 5">?</button>
+                </h3>
+                <div class="input-group">
+                    <label>Quick examples to try (will use text input):</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                        <button class="button" onclick="loadExample('Hello World!')">Hello World!</button>
+                        <button class="button" onclick="loadExample('DNA is amazing!')">DNA is amazing!</button>
+                        <button class="button" onclick="loadExample('Data storage 123')">Data storage</button>
+                        <button class="button secondary" onclick="loadExample('')">Clear All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer" data-animate>
+            <p>Made by: Vishwajeet Bedse, Chaitanya Josyula, and Swapnil Patil</p>
+        </div>
+    </div>
+
+    <!-- Modal HTML -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+            <h2 id="modalTitle">Modal Title</h2>
+            <div class="modal-content" id="modalContent">
+                <p>This is modal content.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="button" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DNA encoding rules
+        const dnaMap = {
+            '00': 'A', // Adenine
+            '01': 'T', // Thymine  
+            '10': 'C', // Cytosine
+            '11': 'G'  // Guanine
+        };
+        
+        const reverseDnaMap = {
+            'A': '00',
+            'T': '01', 
+            'C': '10',
+            'G': '11'
+        };
+
+        const complementaryMap = {
+            'A': 'T',
+            'T': 'A',
+            'C': 'G',
+            'G': 'C'
+        };
+
+        // Store the full binary sequence globally
+        let currentBinarySequence = "";
+
+        // DOM elements
+        const binaryOutput = document.getElementById('binaryOutput');
+        const dnaLadderView = document.getElementById('dnaLadderView');
+        const dnaCharView = document.getElementById('dnaCharView');
+        const binaryOutputContainer = document.getElementById('binaryOutputContainer');
+        const dnaOutputContainer = document.getElementById('dnaOutputContainer');
+        const decodedOutput = document.getElementById('decodedOutput');
+        const statsStep = document.getElementById('statsStep');
+        const statsOutput = document.getElementById('statsOutput');
+        
+        // --- Main Encoding Function ---
+        function encodeData() {
+            clearOutputs();
+            currentBinarySequence = "";
+
+            const text = document.getElementById('inputText').value;
+            if (!text) {
+                showModal('Error', 'Please enter some text to encode.');
+                return;
+            }
+            processText(text);
+        }
+
+        function processText(text) {
+            let binary = '';
+            for (let i = 0; i < text.length; i++) {
+                binary += text.charCodeAt(i).toString(2).padStart(8, '0');
+            }
+            currentBinarySequence = binary;
+            
+            // For display, add spaces (but only show first 1000 chars)
+            let displayText = binary.substring(0, 1000).replace(/(.{8})/g, '$1 ').trim();
+            if (binary.length > 1000) displayText += '... [Truncated]';
+            
+            binaryOutput.textContent = displayText;
+            binaryToDna(binary);
+        }
+
+        // --- FIXED: binaryToDna to build full ladder + char view ---
+        function binaryToDna(binary) {
+            if (binary.length % 2 !== 0) {
+                binary += '0'; // Pad if odd length
+            }
+
+            // Strings for each part of the horizontal ladder
+            let topStrandHtml = '';
+            let bondsHtml = '';
+            let bottomStrandHtml = '';
+            // String for the character view
+            let charViewHtml = '';
+            let dnaSequence = '';
+            
+            for (let i = 0; i < binary.length; i += 2) {
+                const bits = binary.substr(i, 2);
+                if (bits.length === 2) {
+                    const base = dnaMap[bits];
+                    const complement = complementaryMap[base];
+                    dnaSequence += base;
+                    
+                    const bondType = (base === 'A' || base === 'T') ? 'double' : 'triple';
+                    // Add a span only for triple bonds
+                    const middleBondHtml = (bondType === 'triple') ? '<span class="middle-bond"></span>' : '';
+
+                    // Build all 3 parts of the ladder
+                    topStrandHtml += `<div class="dna-base dna-base-${base}" title="${base}">${base}</div>`;
+                    bondsHtml += `<div class="base-link ${bondType}" title="${base}-${complement} ${bondType} bond">${middleBondHtml}</div>`;
+                    bottomStrandHtml += `<div class="dna-base dna-base-${complement}" title="${complement}">${complement}</div>`;
+
+                    // Build character view
+                    charViewHtml += `<span class="char-base-${base}" title="Binary: ${bits}">${base}</span>`;
+                }
+            }
+
+            // Assemble the final ladder HTML
+            const ladderHtml = `
+                <div class="dna-backbone"></div>
+                <div class="dna-strand">${topStrandHtml}</div>
+                <div class="base-link-container">${bondsHtml}</div>
+                <div class="dna-strand">${bottomStrandHtml}</div>
+                <div class="dna-backbone"></div>
+            `;
+            
+            dnaLadderView.innerHTML = ladderHtml;
+            dnaCharView.innerHTML = charViewHtml;
+
+            // Make containers visible and set default view
+            binaryOutputContainer.classList.add('visible');
+            dnaOutputContainer.classList.add('visible');
+            switchDnaView('ladder'); // Default to ladder
+            
+            updateStats(binary.length, dnaSequence.length);
+        }
+
+        // --- Function to switch between DNA views ---
+        function switchDnaView(viewName) {
+            const ladderView = document.getElementById('dnaLadderView');
+            const charView = document.getElementById('dnaCharView');
+            const btnLadder = document.getElementById('btn-view-ladder');
+            const btnChar = document.getElementById('btn-view-char');
+
+            if (viewName === 'ladder') {
+                ladderView.style.display = 'inline-flex';
+                charView.style.display = 'none';
+                btnLadder.classList.add('active');
+                btnChar.classList.remove('active');
+            } else {
+                ladderView.style.display = 'none';
+                charView.style.display = 'block';
+                btnLadder.classList.remove('active');
+                btnChar.classList.add('active');
+            }
+        }
+
+        // --- Stats Calculator ---
+        function updateStats(binaryLength, dnaLength) {
+            statsStep.style.display = 'block';
+            const bytes = binaryLength / 8;
+            
+            // --- FIXED PHYSICAL MASS CALCULATION ---
+            // Average mass of one nucleotide base (Dalton or g/mol)
+            const avgMolarMass = 330; 
+            // Avogadro's number (moles per particle)
+            const avogadro = 6.022e23;
+            // Mass in grams per base
+            const massPerBase = avgMolarMass / avogadro; 
+            const grams = dnaLength * massPerBase;
+            
+            let densityVal, densityUnit;
+
+            if (grams === 0) {
+                densityVal = 0;
+                densityUnit = 'grams (g)';
+            } else if (grams < 1e-21) {
+                densityVal = (grams * 1e24).toFixed(2);
+                densityUnit = 'yoctograms (yg)';
+            } else if (grams < 1e-18) {
+                densityVal = (grams * 1e21).toFixed(2);
+                densityUnit = 'zeptograms (zg)';
+            } else if (grams < 1e-15) {
+                densityVal = (grams * 1e18).toFixed(2);
+                densityUnit = 'attograms (ag)';
+            } else if (grams < 1e-12) {
+                densityVal = (grams * 1e15).toFixed(2);
+                densityUnit = 'femtograms (fg)';
+            } else if (grams < 1e-9) {
+                densityVal = (grams * 1e12).toFixed(2);
+                densityUnit = 'picograms (pg)';
+            } else if (grams < 1e-6) {
+                densityVal = (grams * 1e9).toFixed(2);
+                densityUnit = 'nanograms (ng)';
+            } else if (grams < 1e-3) {
+                densityVal = (grams * 1e6).toFixed(2);
+                densityUnit = 'micrograms (µg)';
+            } else if (grams < 1) {
+                densityVal = (grams * 1e3).toFixed(2);
+                densityUnit = 'milligrams (mg)';
+            } else {
+                densityVal = grams.toFixed(2);
+                densityUnit = 'grams (g)';
+            }
+            // --- END FIXED CALCULATION ---
+
+            statsOutput.innerHTML = `
+                <div class="stat-item">
+                    <h4>Total DNA Bases</h4>
+                    <p>${dnaLength.toLocaleString()}</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Data Size</h4>
+                    <p>${(bytes / 1024).toFixed(2)} KB</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Est. Physical Mass</h4>
+                    <p>${densityVal} ${densityUnit}</p>
+                </div>
+            `;
+            scrollObserver.observe(statsStep);
+            statsStep.classList.add('is-visible');
+        }
+
+        // --- Manual Decoder ---
+        function decodeFromDNA() {
+            const dnaInput = document.getElementById('dnaInput').value.toUpperCase().replace(/[^ATCG]/g, '');
+            
+            if (dnaInput.length === 0) {
+                showModal('Error', 'Please enter a valid DNA sequence (A, T, C, G) to decode.');
+                return;
+            }
+
+            if (dnaInput.length % 4 !== 0) {
+                showModal('Warning', `The input sequence length (${dnaInput.length}) is not a multiple of 4. This means it may not decode to full characters (8 bits). The result might be incomplete.`);
+            }
+            
+            let binary = '';
+            for (let i = 0; i < dnaInput.length; i++) {
+                const base = dnaInput[i];
+                if (reverseDnaMap[base]) {
+                    binary += reverseDnaMap[base];
+                }
+            }
+            
+            let decodedText = '';
+            for (let i = 0; i < binary.length; i += 8) {
+                const byte = binary.substr(i, 8);
+                if (byte.length === 8) {
+                    const charCode = parseInt(byte, 2);
+                    // Only render printable ASCII characters
+                    if (charCode >= 32 && charCode <= 126) {
+                        decodedText += String.fromCharCode(charCode);
+                    } else {
+                        decodedText += ''; // Use empty string for non-printable
+                    }
+                }
+            }
+            
+            decodedOutput.innerHTML = `
+                <div class="success-message">
+                    🎉 Successfully decoded ${dnaInput.length} bases.
+                </div>
+                <div class="visualization visible" id="decodeViz" style="text-align: center; padding: 20px; font-size: 1.2em; background: #f8f9fa; border-radius: 10px;">
+                    <strong>Decoded Message:</strong><br>
+                    <span style="font-size: 1.4em; color: var(--secondary-color); font-weight: 600; word-break: break-all;">"${decodedText}"</span>
+                </div>
+            `;
+            decodedOutput.classList.add('visible');
+        }
+        
+        // --- Utility Functions ---
+        function loadExample(text) {
+            document.getElementById('inputText').value = text;
+            if (text) {
+                encodeData();
+            } else {
+                clearOutputs();
+            }
+        }
+
+        function clearOutputs() {
+            binaryOutput.textContent = '';
+            dnaLadderView.innerHTML = ''; 
+            dnaCharView.innerHTML = ''; 
+            decodedOutput.innerHTML = '';
+            statsStep.style.display = 'none';
+            statsOutput.innerHTML = '';
+            document.getElementById('dnaInput').value = '';
+            
+            binaryOutputContainer.classList.remove('visible');
+            dnaOutputContainer.classList.remove('visible');
+            decodedOutput.classList.remove('visible');
+        }
+
+        // --- Modal ---
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+
+        function showModal(title, content) {
+            modalTitle.textContent = title;
+            modalContent.innerHTML = content;
+            modalOverlay.classList.add('visible');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('visible');
+        }
+        
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        // --- Help Modals ---
+        const helpContent = {
+            1: {
+                title: 'Step 1: Enter Your Data',
+                content: `<p>This is where your digital information starts. Type any message, and the simulator will convert it to DNA.</p>`
+            },
+            2: {
+                title: 'Step 2: Encoding Process',
+                content: `<p>This shows how your data is translated into a biological format.</p>
+                          <ol>
+                            <li><b>Data to Binary:</b> All digital data is fundamentally binary (1s and 0s). Each text character is converted into an 8-bit binary string (a "byte").</li>
+                            <li><b>Binary to DNA:</b> The long binary string is read two bits at a time. Each 2-bit pair is mapped to one of the four DNA bases (A, T, C, G).</li>
+                            <li><b>DNA Sequence:</b> This is the final result! You can switch between:
+                                <ul>
+                                    <li><b>DNA Ladder:</b> A visual, horizontal model of the double helix, complete with complementary base pairs and correct double/triple bonds.</li>
+                                    <li><b>Character View:</b> A simple text string of the primary DNA strand (e.g., ATGC...).</li>
+                                </ul>
+                            </li>
+                          </ol>`
+            },
+            3: {
+                title: 'Step 3: Real-World Statistics',
+                content: `<p>These numbers show *why* DNA data storage is so powerful.</p>
+                          <ul>
+                            <li><b>Total DNA Bases:</b> The length of the final DNA strand.</li>
+                            <li><b>Data Size:</b> The size of your original data in Kilobytes (KB).</li>
+                            <li><b>Est. Physical Mass:</b> An illustration of the *incredible* density of DNA. This calculation is based on the actual average mass of a single nucleotide, showing the theoretical physical weight of the DNA molecules needed to store your data.</li>
+                          </ul>`
+            },
+            4: {
+                title: 'Step 4: Manual Decoder',
+                content: `<p>This tool reverses the encoding process.</p>
+                          <p>You can paste in any sequence of A, T, C, and G. The app will:</p>
+                          <ol>
+                            <li>Map each DNA base back to its 2-bit binary pair (e.g., A -> 00).</li>
+                            <li>Group the binary string into 8-bit bytes.</li>
+                            <li>Translate each byte back into a text character.</li>
+                          </ol>
+                          <p><b>Try it:</b> Copy the sequence from Step 2's "Character View," paste it here, and change one letter (e.g., change an 'A' to a 'G'). See how it corrupts the decoded message!</p>`
+            },
+            5: {
+                title: 'Step 5: Try Different Messages',
+                content: `<p>Use these buttons to quickly load and encode different text strings. The "Clear All" button will reset the entire simulator.</p>`
+            }
+        };
+
+        function showHelp(step) {
+            const help = helpContent[step];
+            if (help) {
+                showModal(help.title, help.content);
+            }
+        }
+
+        // --- Scroll Animations ---
+        const animatedElements = document.querySelectorAll('[data-animate]');
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    scrollObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        animatedElements.forEach(el => {
+            scrollObserver.observe(el);
+        });
+
+        // --- Initialize ---
+        window.onload = function() {
+            document.getElementById('inputText').value = 'Hello DNA!';
+            encodeData();
+        };
+    </script>
+</body>
+</html>
+
